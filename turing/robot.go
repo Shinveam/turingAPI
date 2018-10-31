@@ -1,4 +1,4 @@
-﻿package turing
+package turing
 
 import (
 	"github.com/bitly/go-simplejson"
@@ -162,7 +162,6 @@ func Robots(ApiKey string, req_type TuringParam, contents string) (interface{}, 
 		values := retMsg.Get("values").MustMap()
 		for _, v := range values {
 			//fmt.Println(values[k])
-			//fmt.Println(reflect.TypeOf(values[k]))
 			//fmt.Println(v)
 			return v, err
 		}
