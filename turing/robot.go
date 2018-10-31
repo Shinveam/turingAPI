@@ -1,4 +1,4 @@
-package turing
+﻿package turing
 
 import (
 	"github.com/bitly/go-simplejson"
