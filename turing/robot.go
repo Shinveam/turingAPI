@@ -1,7 +1,7 @@
 package turing
 
 import (
-	"fmt"
+	"github.com/bitly/go-simplejson"
 	"github.com/imroc/req"
 	"net"
 )
@@ -84,14 +84,15 @@ func ReqType(req_type int) TuringParam {
 }
 
 //主体部分
-func Robots(ApiKey string, req_type TuringParam, contents string) ([]string, error) {
+func Robots(ApiKey string, req_type TuringParam, contents string) (interface{}, error) {
 
 	var cuid string
-	netitfs, err := net.Interfaces()
+	//获取本机MAC地址
+	MACAddr, err := net.Interfaces()
 	if err != nil {
 		cuid = "demo"
 	} else {
-		for _, itf := range netitfs {
+		for _, itf := range MACAddr {
 			if cuid = itf.HardwareAddr.String(); len(cuid) > 0 {
 				break
 			}
@@ -111,22 +112,23 @@ func Robots(ApiKey string, req_type TuringParam, contents string) ([]string, err
 			//InputMedia: &InputMedia{
 			//	Url: contents,
 			//},
-			SelfInfo: &SelfInfo{
-				Location: &Location{
-					City:     "北京",
-					Province: "北京",
-					Street:   "信息路",
-				},
-			},
+
+			//SelfInfo: &SelfInfo{
+			//	Location: &Location{
+			//		City:     "北京",
+			//		Province: "北京",
+			//		Street:   "信息路",
+			//	},
+			//},
 		},
 
 		UserInfo: &UserInfo{
 			ApiKey: ApiKey,
-			UserId: "test",
+			UserId: "demo",
 		},
 	}
 
-	fmt.Println(turingParam)
+	//fmt.Println(turingParam)
 
 	rt := req_type
 	rt(turingParam)
@@ -134,12 +136,37 @@ func Robots(ApiKey string, req_type TuringParam, contents string) ([]string, err
 	header := req.Header{
 		"Content-Type": "application/json",
 	}
-	fmt.Println(req.BodyJSON(turingParam))
+	//fmt.Println(req.BodyJSON(turingParam))
 	resp, err := req.Post(URL, header, req.BodyJSON(turingParam))
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(resp.String())
+	//fmt.Println(resp.String())
+
+	//处理接受的json数据--simplejson的使用
+	ret, err := simplejson.NewJson([]byte(resp.String()))
+	if err != nil {
+		return nil, err
+	}
+
+	retArray, err := ret.Get("results").Array()
+	if err != nil {
+		return nil, err
+	}
+
+	//var values string
+	for i, _ := range retArray {
+		retMsg := ret.Get("results").GetIndex(i)
+		//fmt.Println("retMsg:",retMsg.MustMap())
+
+		values := retMsg.Get("values").MustMap()
+		for _, v := range values {
+			//fmt.Println(values[k])
+			//fmt.Println(reflect.TypeOf(values[k]))
+			//fmt.Println(v)
+			return v, err
+		}
+	}
 
 	return nil, err
 }
