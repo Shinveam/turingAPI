@@ -6,7 +6,7 @@ import (
 	"turingAPI/turing"
 )
 
-const ApiKey string = "eb58b64b8cd34a68b3c8fe588ded8191"
+const ApiKey string = "your apikey"
 
 func TuringRobot() {
 	resp, err := turing.Robots(ApiKey,
